@@ -897,7 +897,7 @@ class Prophet(object):
         k = (L0 - L1) / T
         return (k, m)
 
-    def fit(self, df, sample_weight=None, **kwargs):
+    def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
         This sets self.params to contain the fitted model parameters. It is a
@@ -969,24 +969,14 @@ class Prophet(object):
 
         model = prophet_stan_model
 
-        if sample_weight is None:
-            def stan_init():
-                return {
-                    'k': kinit[0],
-                    'm': kinit[1],
-                    'delta': np.zeros(len(self.changepoints_t)),
-                    'beta': np.zeros(seasonal_features.shape[1]),
-                    'sigma_obs': np.ones(len(history)),
-                }
-        else:
-            def stan_init():
-                return {
-                    'k': kinit[0],
-                    'm': kinit[1],
-                    'delta': np.zeros(len(self.changepoints_t)),
-                    'beta': np.zeros(seasonal_features.shape[1]),
-                    'sigma_obs': 1 / sample_weight,
-                }
+        def stan_init():
+            return {
+                'k': kinit[0],
+                'm': kinit[1],
+                'delta': np.zeros(len(self.changepoints_t)),
+                'beta': np.zeros(seasonal_features.shape[1]),
+                'sigma_obs': 1,
+            }
 
         if (
             (history['y'].min() == history['y'].max())
@@ -1287,7 +1277,7 @@ class Prophet(object):
         Xb_m = np.matmul(seasonal_features.values, beta * s_m)
 
         sigma = self.params['sigma_obs'][iteration]
-        noise = np.random.normal(0, sigma[-1], df.shape[0]) * self.y_scale
+        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
         return pd.DataFrame({
             'yhat': trend * (1 + Xb_m) + Xb_a + noise,

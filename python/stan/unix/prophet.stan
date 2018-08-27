@@ -95,7 +95,7 @@ parameters {
   real k;                   // Base trend growth rate
   real m;                   // Trend offset
   vector[S] delta;          // Trend rate adjustments
-  vector<lower=0>[T] sigma_obs;  // Observation noise
+  real<lower=0> sigma_obs;  // Observation noise
   vector[K] beta;           // Regressor coefficients
 }
 
