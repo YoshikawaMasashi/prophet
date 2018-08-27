@@ -84,6 +84,7 @@ data {
   int trend_indicator;  // 0 for linear, 1 for logistic
   vector[K] s_a;        // Indicator of additive features
   vector[K] s_m;        // Indicator of multiplicative features
+  vector[T] inv_w;
 }
 
 transformed data {
@@ -113,14 +114,14 @@ model {
       linear_trend(k, m, delta, t, A, t_change)
       .* (1 + X * (beta .* s_m))
       + X * (beta .* s_a),
-      sigma_obs
+      sigma_obs * inv_w
     );
   } else if (trend_indicator == 1) {
     y ~ normal(
       logistic_trend(k, m, delta, t, cap, A, t_change, S)
       .* (1 + X * (beta .* s_m))
       + X * (beta .* s_a),
-      sigma_obs
+      sigma_obs * inv_w
     );
   }
 }

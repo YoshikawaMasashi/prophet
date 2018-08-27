@@ -897,7 +897,7 @@ class Prophet(object):
         k = (L0 - L1) / T
         return (k, m)
 
-    def fit(self, df, **kwargs):
+    def fit(self, df, sample_weight=None, **kwargs):
         """Fit the Prophet model.
 
         This sets self.params to contain the fitted model parameters. It is a
@@ -959,6 +959,11 @@ class Prophet(object):
             's_a': component_cols['additive_terms'],
             's_m': component_cols['multiplicative_terms'],
         }
+
+        if sample_weight is None:
+            dat['inv_w'] = np.ones(len(history))
+        else:
+            dat['inv_w'] = 1 / (sample_weight / sample_weight[-1])
 
         if self.growth == 'linear':
             dat['cap'] = np.zeros(self.history.shape[0])
